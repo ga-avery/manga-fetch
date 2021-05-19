@@ -5,6 +5,8 @@ class Log {
    * @param  {...any} args Statements that you want to be printed in the console
    */
   success(...args) {
+    // numbers => yellow
+    args = args.map(arg => isNaN(arg) ? arg : colors.yellow(arg));
     console.log(colors.green('[✓]'), ...args, colors.green('[✓]'));
   }
   /**
@@ -12,6 +14,7 @@ class Log {
    * @param  {...any} args 
    */
   caution(...args) {
+    args = args.map(arg => isNaN(arg) ? arg : colors.yellow(arg))
     console.log(colors.yellow('[!]'), ...args, colors.yellow('[!]'));
   }
   /**
@@ -23,6 +26,7 @@ class Log {
    * @param  {...any} args 
    */
   error(...args) {
+    args = args.map(arg => isNaN(arg) ? arg : colors.yellow(arg))
     console.log(colors.red('[𝑥]\n'), ...args, colors.red('\n[𝑥]'));
   }
 }
