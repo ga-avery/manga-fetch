@@ -1,0 +1,61 @@
+:root {
+  font-size: 16px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: hsl(0, 0%, 25%);
+  color: hsl(0, 0%, 75%);
+}
+
+.authentication {
+  display: flex;
+  justify-content: space-between;
+  color: #deadbe;
+}
+
+.authentication > span {
+  display: inline-block;
+  padding: .5rem 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: auto;
+  width: 60rem;
+  gap: .5rem;
+}
+
+.manga {
+  display: grid;
+  grid-auto-rows: auto;
+  row-gap: .5rem;
+  width: 20rem;
+  padding: 1rem;
+}
+
+.manga__description {
+  overflow-y: scroll;
+  max-height: 10rem;
+}
+
+.manga__title {
+  font-size: 1.5rem;
+}
+
+.manga__download {
+  display: inline;
+}
+
+.search {
+  grid-column-start: span 3;
+
+
+}
