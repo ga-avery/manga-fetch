@@ -1,5 +1,10 @@
 import colors from 'colors';
 class Log {
+  static LogLevels = {
+    SUCCESS: Symbol('success'),
+    CAUTION: Symbol('caution'),
+    ERROR: Symbol('error'),
+  }
   /**
    * Wraps the logged items with green checkboxes e.g. [✓] args [✓]
    * @param  {...any} args Statements that you want to be printed in the console
@@ -30,5 +35,5 @@ class Log {
     console.log(colors.red('[𝑥]\n'), ...args, colors.red('\n[𝑥]'));
   }
 }
-
-export default new Log();
+export const log = new Log();
+export default log;
