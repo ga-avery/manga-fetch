@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manga-Fetch</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <%- include('partials/alerts') %>
+    <header>
+      <nav>
+        <div class="authentication">
+          <span class="authentication__home"><a href="/">Home</a></span>
+          <span>
+          <% if (!currentUser) { %>
+            <span><a href="/auth/signup">Signup</a></span>
+            <span><a href="/auth/login">Login</a></span>
+            <% } else { %>
+              <span><a href="/auth/logout">Logout</a></span>
+              <span><a href="/profile">Profile</a></span>
+              <% } %>
+            </span>
+        </div>
+      </nav>
+    </header>
+    <h3>Manga-Fetch</h3>
+    <div class="grid">
+      <%- body %>
+    </div>
+</body>
+
+</html>

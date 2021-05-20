@@ -1,0 +1,24 @@
+<% let display = results.map(({ data: { id, type, attributes: { title, description }}})=> {
+  return {
+    id,
+    type,
+    title: title.en,
+    description: description.en,
+  }});
+%>
+<%- include('../partials/search') %> 
+<% display.forEach(manga=> { %>
+  <% const style = `border: solid 0.25rem ${nameToColor(manga.title)};` %> 
+  <div class="manga" style="<%= style %>" >
+    <div class="manga__title">
+      <span><%= manga.title %></span>
+      <form action="/search/download" class="manga__download" method="POST">
+        <input type="text" name="id" hidden value="<%=manga.id%>"">
+        <button type="submit">download</button>
+      </form>
+    </div>
+    <div class="manga__description">
+      <%= manga.description %>
+    </div>
+  </div>
+<% }) %>
