@@ -1,4 +1,5 @@
 import colors from 'colors';
+const parse = Symbol('parse');
 class Log {
   static LogLevels = {
     SUCCESS: Symbol('success'),
@@ -11,7 +12,7 @@ class Log {
    */
   success(...args) {
     // numbers => yellow
-    args = args.map(arg => isNaN(arg) ? arg : colors.yellow(arg));
+    args = args.map(this[parse]);
     console.log(colors.green('[✓]'), ...args, colors.green('[✓]'));
   }
   /**
@@ -19,7 +20,7 @@ class Log {
    * @param  {...any} args 
    */
   caution(...args) {
-    args = args.map(arg => isNaN(arg) ? arg : colors.yellow(arg))
+    args = args.map(this[parse]);
     console.log(colors.yellow('[!]'), ...args, colors.yellow('[!]'));
   }
   /**
@@ -31,8 +32,16 @@ class Log {
    * @param  {...any} args 
    */
   error(...args) {
-    args = args.map(arg => isNaN(arg) ? arg : colors.yellow(arg))
+    args = args.map(this[parse]);
     console.log(colors.red('[𝑥]\n'), ...args, colors.red('\n[𝑥]'));
+  }
+
+  [parse](arg) {
+    try {
+      return isNaN(arg) ? arg : colors.yellow(arg);
+    } catch (error) {
+      return arg;
+    }
   }
 }
 export const log = new Log();
