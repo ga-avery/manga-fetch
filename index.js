@@ -1,18 +1,17 @@
 // i made these 🙂
 import './utils/shims';
-import MangaDex   from './api/MangaDex';
-import auth       from './controllers/auth';
-import search     from './controllers/search';
-import dirname    from './utils/dirname';
-import isLoggedIn from './middleware/isLoggedIn';
-import log        from './utils/log'
-import passport   from './config/ppConfig';
+import auth           from './controllers/auth';
+import search         from './controllers/search';
+import isLoggedIn     from './middleware/isLoggedIn';
+import {log, dirname} from './utils';
+import passport       from './config/ppConfig';
 
-import express from 'express';
-import layouts from 'express-ejs-layouts';
-import flash   from 'connect-flash';
-import session from 'express-session';
-import morgan  from 'morgan';
+import express        from 'express';
+import layouts        from 'express-ejs-layouts';
+import flash          from 'connect-flash';
+import session        from 'express-session';
+import morgan         from 'morgan';
+import methodOverride from 'method-override';
 
 const __dirname = dirname(import.meta.url);
 
@@ -20,9 +19,9 @@ const app = express();
 const session_secret = process.env.session_secret;
 
 app.set('view engine', 'ejs');
-const mangadex = new MangaDex();
 
 // flow that works
+// const mangadex = new MangaDex();
 // const maiddragonId = (await mangadex.search('kobayashi dragon'))[0].data.id;
 // log.success('maiddragonId', maiddragonId);
 // const firstChapter = (await mangadex.mangaFeed(maiddragonId))[0];
@@ -44,6 +43,7 @@ app.use(morgan('dev'));
 app.use(express.urlencoded({extended: false}));
 app.use(express.static(`${__dirname}/public`));
 app.use(layouts);
+app.use(methodOverride('_method'));
 
 app.use(session({
   secret: session_secret,
@@ -77,6 +77,10 @@ app.get('/', (_, rs) => {
 app.get('/profile', isLoggedIn, (_, rs) => {
   rs.render('profile');
 });
+
+app.get('/*', (_, rs) => {
+  rs.status(404).redirect('/');
+})
 
 const port = process.env.port || 8080;
 const server = app.listen(port, () => {
