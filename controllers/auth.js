@@ -31,11 +31,11 @@ router.get('/logout', (rq, rs) => {
  * @returns Promise<void>
  */
 const signup = async (rq, rs) => {
-  const { email, name, password } = rq.body;
+  const { name, password } = rq.body;
   try {
     const [user, created] = await db.user.findOrCreate({
-      where: { email },
-      defaults: { name, password }
+      where: { name },
+      defaults: { password }
     });
     if (created) {
       const successObject = {
@@ -44,12 +44,12 @@ const signup = async (rq, rs) => {
       }
       passport.authenticate('local', successObject)(rq, rs);
     } else {
-      rq.flash('error', 'Email already exists');
+      rq.flash('error', 'Username already exists');
       rq.redirect('/auth/signup');
     }
   } catch (err) {
     log.error(err);
-    rq.flash('error', 'Either email or password is incorrect. Please try again.');
+    rq.flash('error', 'Either name or password is incorrect. Please try again.');
     rs.redirect('/auth/signup')
   }
 }
@@ -59,7 +59,7 @@ router.post('/login', passport.authenticate('local', {
   successRedirect: '/',
   failureRedirect: '/auth/login',
   successFlash: 'Welcome back ...',
-  failureFlash: 'Either email or password are incorrect',
+  failureFlash: 'Either name or password are incorrect',
 }));
 
 export default router;

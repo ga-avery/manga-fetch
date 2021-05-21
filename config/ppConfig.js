@@ -5,12 +5,12 @@ import log from '../utils/log';
 const LocalStrategy = local.Strategy;
 
 const STRATEGY = new LocalStrategy({
-  usernameField: 'email',
+  usernameField: 'name',
   passwordField: 'password',
-}, async (email, password, cb) => {
+}, async (name, password, cb) => {
   try {
     const user = await db.user.findOne({
-      where: {email},
+      where: { name },
     });
     if (!user || !user.validPassword(password)) {
       cb(null, false);
@@ -22,7 +22,7 @@ const STRATEGY = new LocalStrategy({
   }
 });
 
-passport.serializeUser((user, cb) =>  {
+passport.serializeUser((user, cb) => {
   cb(null, user.id);
 });
 
