@@ -1,12 +1,4 @@
-<% let display = results.map(({ data: { id, type, attributes: { title, description }}})=> {
-  return {
-    id,
-    type,
-    title: title.en,
-    description: description.en,
-  }});
-%>
-<%- include('../partials/search') %> 
+<%- include('../partials/search') %>
 <% display.forEach(manga=> { %>
   <% const style = `border: solid 0.25rem ${nameToColor(manga.title)};` %> 
   <div class="manga" style="<%= style %>" >
@@ -20,13 +12,13 @@
       <input type="text" name="id" hidden value="<%=manga.id%>"">
       <button type="submit" class="manga__btn">download</button>
     </form>
-    <form action="/search/download" class="manga__download" method="POST">
-      <input type="text" name="id" hidden value="<%=manga.id%>"">
-      <button type="submit" class="manga__btn">favorite</button>
-    </form>
-    <form action="/search/download" class="manga__download" method="POST">
-      <input type="text" name="id" hidden value="<%=manga.id%>"">
-      <button type="submit" class="manga__btn">read later</button>
-    </form>
+    <% if (currentUser) { %>
+      <% manga.buttons.forEach(button => { %>
+        <form action="<%= button.action %>" method="post" class="manga__download">
+          <input type="text" hidden name="id" value="<%= manga.id %>">
+          <button type="submit" class="manga__btn"><%= button.text %></button>
+        </form>
+      <% }) %>
+    <% } %>
   </div>
 <% }) %>
