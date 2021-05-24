@@ -1,0 +1,15 @@
+<ul>
+<% chapterList.forEach(chapter => { %>
+  <li>
+    <span><%= `Chapter ${chapter.chapter}: ${chapter.title}` %></span><br>
+    <form action="/download/<%= chapter.id %>" method="post">
+      <input type="hidden" name="title" value="<%= `${chapter.chapter}${chapter.title ? `-${chapter.title}` : ''}` %>">
+      <input type="hidden" name="hash" value="<%= chapter.hash %>">
+      <% chapter.data.forEach(page => { %> 
+        <input type="hidden" name="page" value="<%= page %>">
+      <% }) %> 
+      <input type="submit" value="download">
+    </form>
+  </li>
+<% }) %>
+</ul>
