@@ -1,18 +1,19 @@
 import fetch from 'node-fetch';
+import JsZip from 'jszip';
 import log from '../utils/log';
 
 const BASE_URL = 'https://api.mangadex.org';
 const refresh = Symbol('refresh');
 const session = Symbol('session');
 const get = Symbol('get');
-const getBlob = Symbol('getBlob');
+const getBuf = Symbol('getBuf');
 const post = Symbol('post');
 const mfetch = Symbol('manga fetch');
 const wait = Symbol('wait');
 /**
  * This class is a map of the necessary API components from the
  * OpenAPI spec here: https://api.mangadex.org/api.yaml
- * at the time of writing this code the API is version 5.0.8
+ * at the time of writing this code the API is version 5.0.13
  * @author Avery Wood
  */
 class MangaDex {
@@ -183,7 +184,14 @@ class MangaDex {
   /**
    * Searches for the chapter list from the corresponding manga uuid in english
    * @param {string} mangaId 
-   * @returns {Promise<{}>}
+   * @returns {Promise<[
+   * {id: string,
+   *  volume: string,
+   *  chapter: string,
+   *  title: string,
+   *  hash: string,
+   *  data: []
+   * }]>}
    */
   async mangaFeed(mangaId) {
     let [limit, offset, total, result] = [100, 0, 0, []];
@@ -211,19 +219,27 @@ class MangaDex {
   }
 
   async getImagesFromChapter(baseUrl, chapterHash, images) {
-    images.forEach(imageUrl => {
-      const image = this[getBlob](`${baseUrl}/data/${chapterHash}/${imageUrl}`);
-    });
+    const zip = new JsZip();
+    for (const image of images) {
+      log.success('currently downloading', image);
+      const buf = await this[getBuf](`${baseUrl}/data/${chapterHash}/${image}`);
+      zip.file(image, buf);
+      await this[wait](1000);
+    }
+    const buf = await zip.generateAsync({type: 'arraybuffer'});
+    const buffer = Buffer.from(buf);
+    return buffer;
   }
-  [getBlob](url, opts = {}) {
-
+  async [getBuf](url) {
+    const resp = await fetch(url);
+    const buf = await resp.arrayBuffer();
+    return buf;
   }
   [wait](ms) {
     return new Promise(res => {
       this.timer = setTimeout(res, ms);
     });
   }
-  // hash -> get mangadex.network server -> get images
 }
 
 export default MangaDex;
