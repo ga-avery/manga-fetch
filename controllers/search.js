@@ -5,7 +5,6 @@ import { nameToColor, log } from '../utils';
 import sequelize from 'sequelize';
 const router = express.Router();
 const mangadex = new MangaDex();
-// mangadex.login(process.env.username, process.env.password);
 // ===================
 // ======= GET =======
 // ===================

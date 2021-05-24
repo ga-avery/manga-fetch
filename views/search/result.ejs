@@ -1,7 +1,7 @@
 <%- include('../partials/search') %>
 <% display.forEach(manga=> { %>
   <% const style = `border: solid 0.25rem ${nameToColor(manga.title)};` %> 
-  <div class="manga" style="<%= style %>" >
+  <div class="manga">
     <div class="manga__title">
       <span><%= manga.title %></span>
     </div>

@@ -24,15 +24,6 @@ const session_secret = process.env.session_secret;
 
 app.set('view engine', 'ejs');
 
-// try {
-//   const result = await mangadex.searchByID('37b87be0-b1f4-4507-affa-06c99ebb27f8', '5adf39d3-e9d3-4bf8-81eb-8f2741f6c5f3', '5927e373-f024-42ad-9307-6f4c05ea3fc4');
-//   log.success(result);  
-// } catch (error) {
-//   log.error('whoops', error);
-// }
-
-
-
 // =======================
 // ===== MIDDLEWARE ======
 // =======================

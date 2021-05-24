@@ -27,6 +27,7 @@ Every now and then the API will kick a request, the patch that I have right now 
 ## snippy
 
 ```js
+// from api/MangaDex
 class MangaDex {
   /**
    * This is the base request function for the mangadex API, it automatically
@@ -78,6 +79,7 @@ class MangaDex {
 ```
 
 ```js
+// from utils/nameToColor
 /**
  * Generate personalized colors based on a given name :D
  * @param {string} name 
@@ -85,12 +87,13 @@ class MangaDex {
  */
 export const nameToColor = name => ('#' + parseInt(name, 36)
                                     .toString(16)
-                                    .padStart(8, '0'))
-                                  .slice(0, 9);
+                                    .padStart(8, '0')).slice(0, 9);
 
 export default nameToColor;
 ```
+
 ```js
+// from controllers/search
 router.get('/', async (rq, rs) => {
   if (rq.query.manga) {
     const results = await mangadex.search(rq.query.manga);
