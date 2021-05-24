@@ -43,7 +43,9 @@ class MangaDex {
    * @throws unknown error
    */
   async [mfetch](path, init = { method: 'GET', headers: {} }, retry = 0) {
-    log.caution('fetching:', path)
+    retry > 0
+      ? log.caution('fetching:', path, retry)
+      : log.caution('fetching:', path);
     if (this[session]) {
       log.success('Appending session token to request')
       init.headers.session = this[session];
@@ -53,7 +55,7 @@ class MangaDex {
       response = await fetch(`${BASE_URL}${path}`, init);
     }
     catch (error) {
-      if (retry > 2) {
+      if (retry > 15) {
         throw new Error('maximum retries reached');
       }
       log.error('error, could not connect', retry, error);
@@ -100,22 +102,22 @@ class MangaDex {
 
   /**
    * Sends a GET request to the specified path with the querystring made from a
-   * query object. The query object is a collection of k:v pairs.
+   * query array. The query array is a collection of k:v pairs.
    * 
    * This is an internal method which should not be called directly.
    * @param {string} path 
-   * @param {} query 
+   * @param {[k, v]} query 
    * @returns {Promise<{}>} a promise resolving to JSON after server response.
    */
-  async [get](path, query = {}) {
+  async [get](path, query = []) {
     log.success('getting!', path)
     if (!path.endsWith('/')) {
       path += '/';
     }
 
     const queryParams = new URLSearchParams()
-    for (const q of Object.keys(query)) {
-      queryParams.append(q, query[q])
+    for (const kv of query) {
+      queryParams.append(kv[0], kv[1])
     }
     if (`${queryParams}`) {
       return this[mfetch](`${path}?${queryParams}`);
@@ -158,7 +160,13 @@ class MangaDex {
    * @returns results array from the API call
    */
   async search(title) {
-    const json = await this[get]('/manga', { title });
+    const json = await this[get]('/manga', [['title', title]]);
+    return json.results;
+  }
+
+  async searchByID(...ids) {
+    const queries = ids.map(id => (['ids[]', id]))
+    const json = await this[get]('/manga', queries);
     return json.results;
   }
 
@@ -180,11 +188,11 @@ class MangaDex {
   async mangaFeed(mangaId) {
     let [limit, offset, total, result] = [100, 0, 0, []];
     do {
-      const json = await this[get](`/manga/${mangaId}/feed`, {
-        'locales[]': 'en',
-        offset,
-        limit,
-      });
+      const json = await this[get](`/manga/${mangaId}/feed`, [
+        ['translatedLanguage[]', 'en'],
+        ['offset', offset],
+        ['limit', limit],
+      ]);
       [limit, offset, total] = [json.limit, json.offset, json.total];
       const chapters = json.results
         .map(({ data: { id, attributes: { volume, chapter, title, hash, data } } }) => {
