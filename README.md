@@ -23,3 +23,132 @@ To install:
 
 ## unsolved problems
 Every now and then the API will kick a request, the patch that I have right now is to simply replay the requests up to 15 times before giving up (with some delay) before exploding. I'll solve the explosion with proper error handling in a future version, the clearest patch that I could do is make my project compatible with [forever](https://www.npmjs.com/package/forever)
+
+## snippy
+
+```js
+class MangaDex {
+  /**
+   * This is the base request function for the mangadex API, it automatically
+   * refreshes the session if it is detected as expired and repeats the initial
+   * fetch call, ensuring that post/get calls receive expected values.
+   * 
+   * This is an internal method which should not be called directly.
+   * @param {string} path 
+   * @param {{}} init 
+   * @returns json from the endpoint
+   * @throws unknown error
+   */
+  async [mfetch](path, init = { method: 'GET', headers: {} }, retry = 0) {
+    retry > 0
+      ? log.caution('fetching:', path, retry)
+      : log.caution('fetching:', path);
+    if (this[session]) {
+      log.success('Appending session token to request')
+      init.headers.session = this[session];
+    }
+    let response;
+    try {
+      response = await fetch(`${BASE_URL}${path}`, init);
+    }
+    catch (error) {
+      if (retry > 15) {
+        throw new Error('maximum retries reached');
+      }
+      log.error('error, could not connect', retry, error);
+      await this[wait](2000);
+      return this[mfetch](path, init, retry+1);
+    }
+    const json = await response.json();
+    if (json?.result === 'error') {
+      // 401 Unauthorized
+      if (json.errors.some(error => error.status === 401)) {
+        // We logged in, but our sessionToken expired
+        if (this[refresh]) {
+          log.caution('Authorization expired, refreshing token...')
+          await this[refresh]();
+          return this[mfetch](path, init);
+        }
+      }
+      throw new Error(JSON.stringify(json));
+    }
+    return json;
+  }
+}
+```
+
+```js
+/**
+ * Generate personalized colors based on a given name :D
+ * @param {string} name 
+ * @returns css compatible hex-color
+ */
+export const nameToColor = name => ('#' + parseInt(name, 36)
+                                    .toString(16)
+                                    .padStart(8, '0'))
+                                  .slice(0, 9);
+
+export default nameToColor;
+```
+```js
+router.get('/', async (rq, rs) => {
+  if (rq.query.manga) {
+    const results = await mangadex.search(rq.query.manga);
+    let display = results.map((
+      { data: { id, type, attributes: { title, description } } }) => {
+      return {
+        id,
+        type,
+        title: title.en,
+        description: description.en,
+      }
+    });
+    const favorites = new Set();
+    const readLaters = new Set();
+    if (rq.user) {
+      const user = await db.user.findOne({ where: { name: rq.user.name } })
+      const userId = user.id;
+      const list = await db.list.findAll({
+        where: {
+          userId,
+          [sequelize.Op.or]: display.map(({id}) => {return {manga_id: id}}),
+        }
+      });
+      list.forEach(manga => {
+        if (manga.type === 'favorite') {
+          favorites.add(manga.manga_id);
+          return
+        }
+        readLaters.add(manga.manga_id);
+      })
+    }
+    function build (hasFavorited, hasReadLayer) {
+      const buttons = [];
+      if (hasFavorited) {
+        buttons.push({text: '★', action: '/search/favorite?_method=DELETE'});
+        buttons.push({text: 'save', action: '/search/favorite?_method=PUT'});
+        return buttons;
+      }
+      if (hasReadLayer) {
+        buttons.push({text: '☆', action: '/search/later?_method=PUT'});
+        buttons.push({text: 'saved', action: '/search/later?_method=DELETE'});
+        return buttons
+      }
+      buttons.push({text: '☆', action: '/search/favorite'});
+      buttons.push({text: 'save', action: '/search/later'});
+      return buttons
+    }
+    display = display.map(manga => {
+      const hasFavorited = favorites.has(manga.id);
+      const hasReadLater = readLaters.has(manga.id);
+      return {
+        ...manga,
+        buttons: build(hasFavorited, hasReadLater),
+      };
+    });
+    rs.render('search/result', { display, nameToColor });
+    return;
+  }
+  rs.render('index');
+});
+```
