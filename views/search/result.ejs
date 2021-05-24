@@ -8,14 +8,13 @@
     <div class="manga__description">
       <%= manga.description %>
     </div>
-    <form action="/search/download" class="manga__download" method="POST">
-      <input type="text" name="id" hidden value="<%=manga.id%>"">
+    <form action="/manga/<%= manga.id %>" class="manga__download" method="GET">
       <button type="submit" class="manga__btn">download</button>
     </form>
     <% if (currentUser) { %>
       <% manga.buttons.forEach(button => { %>
         <form action="<%= button.action %>" method="post" class="manga__download">
-          <input type="text" hidden name="id" value="<%= manga.id %>">
+          <input type="hidden" name="id" value="<%= manga.id %>">
           <button type="submit" class="manga__btn"><%= button.text %></button>
         </form>
       <% }) %>
