@@ -75,21 +75,29 @@ class MangaDex {
     }
     return json;
   }
+    async getImagesFromChapter(baseUrl, chapterHash, images) {
+    const zip = new JsZip();
+    for (const image of images) {
+      log.success('currently downloading', image);
+      const buf = await this[getBuf](`${baseUrl}/data/${chapterHash}/${image}`);
+      zip.file(image, buf);
+      await this[wait](1000);
+    }
+    const buf = await zip.generateAsync({type: 'arraybuffer'});
+    const buffer = Buffer.from(buf);
+    return buffer;
+  }
+  async [getBuf](url) {
+    const resp = await fetch(url);
+    const buf = await resp.arrayBuffer();
+    return buf;
+  }
+  [wait](ms) {
+    return new Promise(res => {
+      this.timer = setTimeout(res, ms);
+    });
+  }
 }
-```
-
-```js
-// from utils/nameToColor
-/**
- * Generate personalized colors based on a given name :D
- * @param {string} name 
- * @returns css compatible hex-color
- */
-export const nameToColor = name => ('#' + parseInt(name, 36)
-                                    .toString(16)
-                                    .padStart(8, '0')).slice(0, 9);
-
-export default nameToColor;
 ```
 
 ```js
