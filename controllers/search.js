@@ -52,8 +52,8 @@ router.get('/', async (rq, rs) => {
         buttons.push({text: 'saved', action: '/search/later?_method=DELETE'});
         return buttons
       }
-      buttons.push({text: '☆', method: 'POST', action: '/search/favorite'});
-      buttons.push({text: 'save', method: 'POST', action: '/search/later'});
+      buttons.push({text: '☆', action: '/search/favorite'});
+      buttons.push({text: 'save', action: '/search/later'});
       return buttons
     }
     display = display.map(manga => {
@@ -84,11 +84,13 @@ const getUserList = async (userName, mangaId) => {
   });
   return list;
 }
+
 router.delete('/favorite', async (rq, rs) => {
   const list = await getUserList(rq.user.name, rq.body.id);
   list.destroy();
   rs.redirect(rq.header('Referer'));
 });
+
 router.delete('/later', async (rq, rs) => {
   const list = await getUserList(rq.user.name, rq.body.id);
   list.destroy();
@@ -103,19 +105,16 @@ router.put('/favorite', async (rq, rs) => {
   list.update({type: 'read_later'});
   rs.redirect(rq.header('Referer'));
 });
+
 router.put('/later', async (rq, rs) => {
   const list = await getUserList(rq.user.name, rq.body.id);
   list.update({type: 'favorite'});
   rs.redirect(rq.header('Referer'));
 });
+
 // ===================
 // ====== POST =======
 // ===================
-router.post('/download', async (rq, rs) => {
-  log.error(rq.body);
-  rs.json(rq.body);
-});
-
 router.post('/later', async (rq, rs) => {
   const name = rq.user.name;
   const user = await db.user.findOne({ where: { name} });
