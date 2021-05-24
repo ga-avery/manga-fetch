@@ -118,7 +118,7 @@ app.get('/*', (_, rs) => {
   rs.status(404).redirect('/');
 })
 
-const port = process.env.port || 8080;
+const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
   log.success('Listening on port', port)
 });
