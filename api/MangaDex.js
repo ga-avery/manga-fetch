@@ -217,13 +217,14 @@ class MangaDex {
     const { baseUrl } = await this[get](`/at-home/server/${chapterId}`);
     return baseUrl;
   }
-
+  
   async getImagesFromChapter(baseUrl, chapterHash, images) {
     const zip = new JsZip();
+    let idx = 0;
     for (const image of images) {
       log.success('currently downloading', image);
       const buf = await this[getBuf](`${baseUrl}/data/${chapterHash}/${image}`);
-      zip.file(image, buf);
+      zip.file(`z${++idx}.${image.split('.').slice(-1)}`, buf);
       await this[wait](1000);
     }
     const buf = await zip.generateAsync({type: 'arraybuffer'});
